@@ -1,0 +1,7 @@
+{
+  "name": "Main-Drone Dashboard",
+  "description": "The project aims to be a manufacturer-independent drone platform, connecting various drone devices with standardized interfaces, performing Redis-based authentication and status. ",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
