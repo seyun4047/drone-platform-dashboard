@@ -137,7 +137,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             <span>SUPPORT: mutzin@mutzin.com</span>
           </div>
           <div className="text-right flex flex-col gap-1">
-             <span>V4.0.1</span>
+             <span>V1.0.1</span>
              <a href="https://github.com/seyun4047" target="_blank" rel="noopener noreferrer" className="hover:text-sky-400">@seyun4047</a>
           </div>
         </div>

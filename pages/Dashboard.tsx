@@ -62,10 +62,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     "events",
   );
 
-  // Selected history entry (used for viewing past snapshot data)
   const [focusedHistoryEvent, setFocusedHistoryEvent] =
     useState<EventLogEntry | null>(null);
-
   const [telemetryHistory, setTelemetryHistory] = useState<{
     [serial: string]: TelemetryLogEntry[];
   }>({});
@@ -81,12 +79,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     dronesRef.current = drones;
   }, [drones]);
 
-  // Reset snapshot view when selected drone changes
   useEffect(() => {
     setFocusedHistoryEvent(null);
   }, [selectedSerial]);
 
-  // Safe number formatting utility
   const safeFixed = (val: any, digits: number = 0): string => {
     const num = Number(val);
     return isNaN(num) ? "---" : num.toFixed(digits);
@@ -107,14 +103,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             telemetryRes = await apiService.getTelemetry(serial);
           } catch (e: any) {
             if (e.message === "AUTH_EXPIRED") throw e;
-            console.warn(`[TELEMETRY] ${serial} skip`);
           }
-
           try {
             eventRes = await apiService.getEvent(serial);
           } catch (e: any) {
             if (e.message === "AUTH_EXPIRED") throw e;
-            console.warn(`[EVENT] ${serial} skip`);
           }
 
           const tData = telemetryRes?.data;
@@ -131,7 +124,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             latitude: 0,
             person_count: 0,
           };
-          // Prefer the latest data between telemetry and event timestamps
+
           if (tData && tTime >= eTime) {
             currentTelemetry = { ...tData };
           } else if (eData) {
@@ -153,7 +146,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
           const finalUpdateTs = Math.max(tTime, eTime) || now;
 
-          // Record telemetry history if meaningful changes occurred
           setTelemetryHistory((prev) => {
             const list = prev[serial] || [];
             const last = list[0];
@@ -162,7 +154,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               last.speed !== currentTelemetry.speed ||
               last.latitude !== currentTelemetry.latitude ||
               last.longitude !== currentTelemetry.longitude;
-
             if (!isChanged) return prev;
             return {
               ...prev,
@@ -173,13 +164,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
             };
           });
 
-          // Record event history based on timestamp
           if (eData && eTime > 0) {
             setEventHistory((prev) => {
               const list = prev[serial] || [];
               const last = list[0];
               const isNewEvent = !last || eTime > last.timestamp;
-
               if (!isNewEvent) return prev;
               return {
                 ...prev,
@@ -203,9 +192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
       setDrones(updatedDrones);
     } catch (error: any) {
-      if (error.message === "AUTH_EXPIRED") {
-        onLogout();
-      }
+      if (error.message === "AUTH_EXPIRED") onLogout();
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -231,9 +218,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     [drones, selectedSerial],
   );
 
-  // Determine which data to display:
-  // - If a history entry is selected, show snapshot data
-  // - Otherwise, show live drone data
   const displayData = useMemo(() => {
     if (!liveDrone) return null;
     if (focusedHistoryEvent) {
@@ -260,30 +244,28 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
   return (
     <div className="flex h-screen bg-slate-950 text-sky-100 font-sans overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-20 lg:w-72 border-r border-sky-900/50 bg-slate-900/50 flex flex-col items-center lg:items-stretch p-4 gap-8 shrink-0 relative">
+      {/* Sidebar - Expanded only above 1200px */}
+      <aside className="w-20 min-[1201px]:w-72 border-r border-sky-900/50 bg-slate-900/50 flex flex-col items-center min-[1201px]:items-stretch p-4 gap-8 shrink-0 relative transition-all duration-300">
         <div className="flex items-center gap-3 px-2">
-          <ShieldCheck size={32} className="text-sky-50 shrink-0" />
-          <div className="hidden lg:flex flex-col">
+          {/* <ShieldCheck size={32} className="text-sky-50 shrink-0" /> */}
+          <div className="hidden min-[1201px]:flex flex-col">
             <span className="font-futuristic text-xl tracking-tighter glow-text-blue leading-tight uppercase">
               Main-Drone
             </span>
             <span className="text-[8px] text-sky-500/80 font-mono uppercase tracking-widest mt-1">
-              Tactical Hub
+              MAnufacturer INdependent<br></br>Drone Monitoring Platform
             </span>
           </div>
         </div>
-
         <nav className="flex-1 flex flex-col gap-2">
           <button className="flex items-center gap-4 p-3 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 shadow-[0_0_15px_rgba(14,165,233,0.1)]">
             <LayoutDashboard size={20} />
-            <span className="hidden lg:block font-futuristic text-sm uppercase tracking-wide">
+            <span className="hidden min-[1201px]:block font-futuristic text-sm uppercase tracking-wide">
               Dashboard
             </span>
           </button>
-
           <div className="mt-8 pt-4 border-t border-sky-900/30">
-            <p className="hidden lg:block text-[9px] text-sky-500/40 font-futuristic uppercase tracking-[0.2em] mb-3 px-2">
+            <p className="hidden min-[1201px]:block text-[9px] text-sky-500/40 font-futuristic uppercase tracking-[0.2em] mb-3 px-2">
               External
             </p>
             <a
@@ -292,20 +274,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               className="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 text-sky-500/50 transition-colors"
             >
               <Github size={20} />
-              <span className="hidden lg:block font-futuristic text-sm uppercase tracking-wide">
+              <span className="hidden min-[1201px]:block font-futuristic text-sm uppercase tracking-wide">
                 Developer
               </span>
             </a>
           </div>
         </nav>
-
         <div className="mt-auto border-t border-sky-900/30 pt-4">
           <button
             onClick={onLogout}
             className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
           >
             <LogOut size={20} />
-            <span className="hidden lg:block font-futuristic text-sm uppercase">
+            <span className="hidden min-[1201px]:block font-futuristic text-sm uppercase">
               Logout
             </span>
           </button>
@@ -313,14 +294,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative  min-w-[310px] overflow-x-auto">
         <main
-          className={`flex-1 p-4 lg:p-8 custom-scroll transition-all duration-500 ${selectedSerial ? "mr-0 lg:mr-[400px]" : ""}`}
+          className={`flex-1 p-4 min-[1201px]:p-8 custom-scroll transition-all duration-500 ${selectedSerial ? "mr-0 min-[1201px]:mr-[400px]" : ""}`}
         >
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 shrink-0">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-3xl font-futuristic text-white glow-text-blue tracking-tight uppercase">
+                <h2 className="text-2xl min-[1201px]:text-3xl font-futuristic text-white glow-text-blue tracking-tight uppercase">
                   Drone Status
                 </h2>
               </div>
@@ -334,7 +315,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 </span>
               </div>
             </div>
-
             <RefreshControls
               interval={refreshInterval}
               onIntervalChange={setRefreshInterval}
@@ -366,9 +346,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
           )}
         </main>
 
-        {/* Detail Panel */}
+        {/* Detail Panel - Mobile/Overlay below 1200px */}
         <aside
-          className={`absolute top-0 right-0 h-full w-full lg:w-[400px] glass border-l border-sky-400/30 z-20 transition-transform duration-500 ease-in-out shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col ${selectedSerial ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute top-0 right-0 h-full w-full min-[1201px]:w-[400px] glass border-l border-sky-400/30 z-20 transition-transform duration-500 ease-in-out shadow-[-20px_0_50px_rgba(0,0,0,0.5)] flex flex-col ${selectedSerial ? "translate-x-0" : "translate-x-full"}`}
         >
           {liveDrone && displayData ? (
             <>
@@ -377,8 +357,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                   <h3 className="font-futuristic text-white text-lg uppercase tracking-wider">
                     {liveDrone.name}
                   </h3>
-                  <span className="text-[10px] text-sky-500 font-mono uppercase">
-                    Node ID: {liveDrone.serial}
+                  <span className="text-[8px] text-sky-500/60 font-mono uppercase tracking-widest mt-1">
+                    Satellite Tracking Enabled
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -519,7 +499,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         onClick={() => setActiveLogTab("telemetry")}
                         className={`text-[9px] px-3 py-1 rounded-md transition-all font-futuristic uppercase ${activeLogTab === "telemetry" ? "bg-sky-500 text-slate-950 font-bold" : "text-sky-500/40 hover:text-sky-200"}`}
                       >
-                        Telemetry
+                        Telem
                       </button>
                     </div>
                   </div>
@@ -627,15 +607,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                             </div>
                           ),
                         )}
-                    {(
-                      (activeLogTab === "events"
-                        ? eventHistory[selectedSerial!]
-                        : telemetryHistory[selectedSerial!]) || []
-                    ).length === 0 && (
-                      <div className="text-center py-12 text-[10px] text-sky-500/20 font-futuristic uppercase tracking-widest border border-dashed border-sky-500/10 rounded-lg">
-                        Empty Record
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
