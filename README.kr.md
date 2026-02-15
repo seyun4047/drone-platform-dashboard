@@ -1,0 +1,100 @@
+해당 문서는 gemini-2.5-flash 로 자동 번역되었습니다.<br>정확한 내용은 여기서 확인해주세요: [English Document](https://github.com/seyun4047/drone-platform-dashboard/blob/main/README.md)
+
+---
+
+
+
+---
+
+    # PROJECT OVERVIEW
+# 제조사 독립형 드론 플랫폼
+
+---
+**제조사 독립형 통합 드론 모니터링 플랫폼**입니다.
+
+단일 환경에서 다양한 드론을 관리하도록 설계되어,
+**고성능 전문가용 드론부터 시중에서 판매되는 취미용 카메라 드론**까지
+인명 구조 및 재난 대응에 활용될 수 있도록 합니다.
+
+---
+
+## 프로젝트 구조
+
+이 플랫폼은 여러 독립적인 저장소로 구성됩니다:
+
+| Component | Description                                       | Repository                                                              |
+|---------|---------------------------------------------------|-------------------------------------------------------------------------|
+| Server | 핵심 드론 플랫폼 서버 (API, 인증, 텔레메트리) | [GitHub](https://github.com/seyun4047/drone-platform-server)            |
+| Monitoring Server | 실시간 드론 상태 점검 모니터링 서비스   | [GitHub](https://github.com/seyun4047/drone-platform-monitoring-server) |
+| Drone Data Tester | 드론 텔레메트리 및 데이터 시뮬레이션을 위한 테스트 클라이언트 | [GitHub](https://github.com/seyun4047/drone-platform-trans-tester)       |
+| Drone Client | 드론 데이터 수집, 전송 및 분석 | [GitHub](https://github.com/seyun4047/drone-platform-client)            |
+| Dashboard | 드론 플랫폼의 프론트엔드 | [GitHub](https://github.com/seyun4047/drone-platform-dashboard)            |
+| Docs | 플랫폼 문서, API | [GitHub](https://github.com/seyun4047/drone-platform-docs)|
+
+---
+
+## 배경
+
+커스텀 드론, 상용 드론, 소비자용 드론이 기본적인 제어 메커니즘을 공유하지만,
+실제 환경에서의 운용 방식과 **지휘 통제 체계**는 크게 다릅니다.
+
+실제로 드론은 종종 다음과 같은 요소에 크게 의존하는 도구로 활용됩니다:
+- 특정 장비
+- 고도로 훈련된 인력
+
+최근 많은 기관과 기업들이 AI 기술과 통합된 드론 시스템을 구축하려는 시도를 하고 있습니다.
+그러나 이러한 시스템에는 명확한 한계가 있습니다. 일반적으로 특정 드론 모델을 튜닝하거나 단일 유형의 맞춤형 드론을 운용하는 방식에 의존하여, 전문 인력과 독점 기술에 대한 의존성이 강하게 나타납니다.
+
+이러한 의존성은 특히 **인명 구조 및 재난 대응 작전**에서 치명적입니다.
+
+---
+## 프로젝트 목표
+- 인명 구조 및 재난 대응 작전을 지원하는 제조사 독립형 드론 모니터링 플랫폼.
+
+---
+## 목표
+
+- 드론 모델이나 제조사에 상관없이 배포 가능한 드론 모니터링 및 관리 시스템
+- 복잡한 제어 절차 없이 현장에 즉시 투입 가능한 시스템
+- 특정 드론 하드웨어의 성능에 의존하지 않는 시스템
+- 비전문가 드론 취미 사용자들도 비상 상황에서 효과적으로 기여할 수 있는 시스템
+
+---
+
+## 기대 효과
+
+인명 구조 및 재난 대응 시나리오에서, 전문 장비나 구조팀이 현장에 도착하기 전에,
+누구나 조작할 수 있는 모든 가용한 드론이 즉시 투입되어 다음을 수행할 수 있습니다:
+- 피해자 파악
+- 위험 요소 식별
+- 피해 규모 추정
+
+이러한 중요한 **골든 타임**을 확보함으로써, 시스템은 더 빠른 의사 결정과 고급 구조 자원의 보다 효과적인 배치를 가능하게 하며, 궁극적으로 더욱 정교하고 영향력 있는 드론 지원 비상 대응 시스템으로 이어질 것입니다.
+
+---
+
+## 시스템 아키텍처
+
+### 전체 시스템 아키텍처
+<img height="900" alt="AWS Upload Presigned URL-2026-02-13-170224" src="https://github.com/user-attachments/assets/a2cb756b-b30d-49a5-a503-64afa2519ad0" />
+
+
+---
+
+## 핵심 시스템 흐름
+
+|                                                                           Auth Logic                                                                            |                                          Control Data From Drone                                          |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
+|  <img width="450" alt="Redis Token Connection Flow-2026-02-01-182619" src="https://github.com/user-attachments/assets/cf0e6a9e-eeae-4525-aaf1-198c98e61c90" />  | <img width="450" alt="Redis Token Connection Flow-2026-02-01-182708" src="https://github.com/user-attachments/assets/a344e0c5-b12a-45ab-951c-0cefcc87bf2b" />
+ |
+|                                                   **Redis 기반 인증 및 연결 제어 흐름.**                                                   |                    **인증 후 제어 및 텔레메트리 데이터 처리.**                     |
+
+|                                             Token Validation                                              |                                             Monitoring Server                                             |
+|:---------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------:|
+| <img src="https://github.com/user-attachments/assets/456dc993-64a0-4ac8-9138-0f5446aaad07" width="450"/>  |<img width="450" alt="Untitled diagram-2026-02-11-173920" src="https://github.com/user-attachments/assets/6eea1ba2-663d-4bf1-be1d-c729e3bda2f7" />|
+|                          **수신 드론 데이터에 대한 Redis 토큰 유효성 검사.**                          |                              **주기적인 드론 연결 상태 모니터링.**                             |
+
+| Back-End <-> Front-End |
+|:---:|
+| <img height="700" alt="AWS Upload Presigned URL-2026-02-13-144904" src="https://github.com/user-attachments/assets/4e956658-5ef2-4c1d-972d-ea669aa09b67" /> |
+| **백엔드 서버와 프론트엔드 대시보드 간 통신** |
